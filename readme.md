@@ -26,3 +26,5 @@ optional arguments:
   ```
 
 There might be some error while adding web pages to Zotero and all error url will be output in error_list.json file. You can use --errorlist options to reimport those url
+
+A post about writing this tool: https://citrusice.github.io/posts/importing-bookmarks-to-zotero/
