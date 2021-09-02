@@ -240,7 +240,11 @@ async def main():
             node = dfs(bookmarks[0], args.folder)
             dfs_add_url(node, "", COLLECTION_NAME, zotero, task_list)
         else:
-            dfs_add_url(bookmarks, "", COLLECTION_NAME, zotero, task_list)
+            if type(bookmarks)==list:
+                for i in bookmarks:
+                    dfs_add_url(i, "", COLLECTION_NAME, zotero, task_list)
+            else:
+                dfs_add_url(bookmarks, "", COLLECTION_NAME, zotero, task_list)
 
     elif args.errorlist is not None:
         error_list = json.load(open(args.errorlist, "r"))
