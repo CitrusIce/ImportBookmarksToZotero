@@ -1,5 +1,5 @@
 # Import Bookmarks to Zotero
-This is a script for automate importing webpages in netscape bookmarks to Zotero
+This is a script for automate importing webpages in netscape bookmarks to Zotero with snapshot 
 
 ```
 usage: main.py [-h] [--bookmarks BOOKMARKS] [--errorlist ERRORLIST]
