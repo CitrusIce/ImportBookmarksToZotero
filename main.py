@@ -215,6 +215,7 @@ async def main():
     COLLECTION_NAME = "Security"
     parser.add_argument("zotero_path", help="path to Zotero.exe")
     parser.add_argument("--bookmarks", help="bookmarks file path")
+    parser.add_argument("--folder", help="bookmarks folder name")
     parser.add_argument("--errorlist", help="error list file path")
     parser.add_argument(
         "--proxy", help="proxy for browser. example:--proxy socks5://127.0.0.1:1080"
@@ -235,8 +236,12 @@ async def main():
     await zotero.init()
     if args.bookmarks is not None:
         bookmarks = bookmarks_parser.parse(args.bookmarks)
-        node = dfs(bookmarks[0], "knowledge")
-        dfs_add_url(node, "", COLLECTION_NAME, zotero, task_list)
+        if args.folder is not None:
+            node = dfs(bookmarks[0], args.folder)
+            dfs_add_url(node, "", COLLECTION_NAME, zotero, task_list)
+        else:
+            dfs_add_url(bookmarks, "", COLLECTION_NAME, zotero, task_list)
+
     elif args.errorlist is not None:
         error_list = json.load(open(args.errorlist, "r"))
         for error in error_list:
