@@ -4,8 +4,6 @@ import traceback
 from typing import Collection
 import bookmarks_parser
 import asyncio
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from pyppeteer import launch
 import pyppeteer
 import json
