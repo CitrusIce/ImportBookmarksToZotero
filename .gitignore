@@ -1,0 +1,9 @@
+.vscode/*
+*.code-workspace
+
+# Local History for Visual Studio Code
+.history/
+
+error_list.json
+log.txt
+temp
