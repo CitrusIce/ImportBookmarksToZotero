@@ -23,6 +23,8 @@ optional arguments:
 
 
   > python main.py --bookmarks bookmarks.html C:\Program Files (x86)\Zotero\zotero.exe
+
+  # bookmarks.html is the netscape bookmarks file that you export from your browser
   ```
 
 There might be some error while adding web pages to Zotero and all error url will be output in error_list.json file. You can use --errorlist options to reimport those url
