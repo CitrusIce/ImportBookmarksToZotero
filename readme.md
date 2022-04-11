@@ -1,4 +1,7 @@
 # Import Bookmarks to Zotero
+
+Zotero 5.x is require
+
 This is a script for automate importing webpages in netscape bookmarks to Zotero with snapshot 
 
 ```
