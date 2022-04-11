@@ -55,7 +55,7 @@ class TabPool:
 class Zotero:
     def __init__(self, ext_path, zotero_path, proxy=None) -> None:
         self.ext_path = ext_path
-        self.max_tabs = 8
+        self.max_tabs = 16
         self.tabpool = TabPool(self.max_tabs)
         self.tabs_num = 0
         self.proxy = proxy
@@ -190,11 +190,14 @@ class Zotero:
 
 
 def dfs(bookmark_node, folder_name):
-    if bookmark_node["type"] == "folder" and bookmark_node["title"] == folder_name:
-        return bookmark_node
+    if bookmark_node.get('title'):
+        if bookmark_node["title"] == folder_name:
+        # if bookmark_node["type"] == "folder" and bookmark_node["title"] == folder_name:
+            return bookmark_node
     else:
         result = None
-        for node in [n for n in bookmark_node["children"] if n["type"] == "folder"]:
+        for node in [n for n in bookmark_node["children"] ]:
+        # for node in [n for n in bookmark_node["children"] if n["type"] == "folder"]:
             result = dfs(node, folder_name)
             if result is not None:
                 break
@@ -202,17 +205,17 @@ def dfs(bookmark_node, folder_name):
 
 
 def dfs_add_url(node, tags, collection, zotero, task_list):
-    if node["type"] == "bookmark":
+    if node.get('type') and node["type"] == "bookmark":
         task = asyncio.create_task(zotero.add_url(node["url"], collection, tags[:-1]))
         task_list.append(task)
     else:
         for n in node["children"]:
-            dfs_add_url(n, tags + node["title"] + ",", collection, zotero, task_list)
+            new_tag = (node["title"] + ",") if node.get('title') else ""
+            dfs_add_url(n, tags + new_tag, collection, zotero, task_list)
 
 
 async def main():
     parser = argparse.ArgumentParser(description="import bookmarks to Zotero")
-    COLLECTION_NAME = "Security"
     parser.add_argument("zotero_path", help="path to Zotero.exe")
     parser.add_argument("--bookmarks", help="bookmarks file path")
     parser.add_argument("--folder", help="bookmarks folder name")
@@ -221,7 +224,11 @@ async def main():
         "--proxy", help="proxy for browser. example:--proxy socks5://127.0.0.1:1080"
     )
     parser.add_argument("--ext", help="unpack extention folder path not crx file")
+    parser.add_argument("--collect",help="collection name")
     args = parser.parse_args()
+    COLLECTION_NAME = "我的文库"
+    if args.collect is not None:
+        COLLECTION_NAME = args.collect
     task_list = []
     EXT_PATH = ""
     if args.ext is None:

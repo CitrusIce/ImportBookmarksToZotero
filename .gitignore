@@ -3,6 +3,7 @@
 
 # Local History for Visual Studio Code
 .history/
+__pycache__
 
 error_list.json
 log.txt
