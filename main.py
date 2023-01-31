@@ -53,7 +53,7 @@ class TabPool:
 
 
 class Zotero:
-    def __init__(self, ext_path, zotero_path, proxy=None) -> None:
+    def __init__(self, ext_path, zotero_path, userdata_dir=None, proxy=None) -> None:
         self.ext_path = ext_path
         self.max_tabs = 16
         self.tabpool = TabPool(self.max_tabs)
@@ -61,6 +61,7 @@ class Zotero:
         self.proxy = proxy
         self.error_list = []
         self.zotero_path = zotero_path
+        self.userdata_dir = userdata_dir
         self.start_zotero()
         self.error_count = 0
 
@@ -78,10 +79,13 @@ class Zotero:
         self.start_zotero()
 
     async def init(self):
-        cwd = os.getcwd()
-        path = os.path.join(cwd, "temp")
-        if not os.path.exists(path):
-            os.mkdir(path)
+        if self.userdata_dir:
+            cwd = os.getcwd()
+            path = os.path.join(cwd, "temp")
+            if not os.path.exists(path):
+                os.mkdir(path)
+        else:
+            path = self.userdata_dir
         if self.proxy:
             self.browser = await launch(
                 {
@@ -190,14 +194,14 @@ class Zotero:
 
 
 def dfs(bookmark_node, folder_name):
-    if bookmark_node.get('title'):
+    if bookmark_node.get("title"):
         if bookmark_node["title"] == folder_name:
-        # if bookmark_node["type"] == "folder" and bookmark_node["title"] == folder_name:
+            # if bookmark_node["type"] == "folder" and bookmark_node["title"] == folder_name:
             return bookmark_node
     else:
         result = None
-        for node in [n for n in bookmark_node["children"] ]:
-        # for node in [n for n in bookmark_node["children"] if n["type"] == "folder"]:
+        for node in [n for n in bookmark_node["children"]]:
+            # for node in [n for n in bookmark_node["children"] if n["type"] == "folder"]:
             result = dfs(node, folder_name)
             if result is not None:
                 break
@@ -205,18 +209,19 @@ def dfs(bookmark_node, folder_name):
 
 
 def dfs_add_url(node, tags, collection, zotero, task_list):
-    if node.get('type') and node["type"] == "bookmark":
+    if node.get("type") and node["type"] == "bookmark":
         task = asyncio.create_task(zotero.add_url(node["url"], collection, tags[:-1]))
         task_list.append(task)
     else:
         for n in node["children"]:
-            new_tag = (node["title"] + ",") if node.get('title') else ""
+            new_tag = (node["title"] + ",") if node.get("title") else ""
             dfs_add_url(n, tags + new_tag, collection, zotero, task_list)
 
 
 async def main():
     parser = argparse.ArgumentParser(description="import bookmarks to Zotero")
     parser.add_argument("zotero_path", help="path to Zotero.exe")
+    parser.add_argument("--userdata_dir", help="chrome user data dir")
     parser.add_argument("--bookmarks", help="bookmarks file path")
     parser.add_argument("--folder", help="bookmarks folder name")
     parser.add_argument("--errorlist", help="error list file path")
@@ -224,7 +229,7 @@ async def main():
         "--proxy", help="proxy for browser. example:--proxy socks5://127.0.0.1:1080"
     )
     parser.add_argument("--ext", help="unpack extention folder path not crx file")
-    parser.add_argument("--collect",help="collection name")
+    parser.add_argument("--collect", help="collection name")
     args = parser.parse_args()
     COLLECTION_NAME = "我的文库"
     if args.collect is not None:
@@ -236,10 +241,12 @@ async def main():
     else:
         EXT_PATH = args.ext
     if not os.path.exists(EXT_PATH):
-        print("extention not found!",EXT_PATH)
+        print("extention not found!", EXT_PATH)
         return
     # zotero = Zotero(EXT_PATH, "socks5://127.0.0.1:7890")
-    zotero = Zotero(EXT_PATH, args.zotero_path, proxy=args.proxy)
+    zotero = Zotero(
+        EXT_PATH, args.zotero_path, userdata_dir=args.userdata_dir, proxy=args.proxy
+    )
     await zotero.init()
     if args.bookmarks is not None:
         bookmarks = bookmarks_parser.parse(args.bookmarks)
@@ -247,7 +254,7 @@ async def main():
             node = dfs(bookmarks[0], args.folder)
             dfs_add_url(node, "", COLLECTION_NAME, zotero, task_list)
         else:
-            if type(bookmarks)==list:
+            if type(bookmarks) == list:
                 for i in bookmarks:
                     dfs_add_url(i, "", COLLECTION_NAME, zotero, task_list)
             else:
