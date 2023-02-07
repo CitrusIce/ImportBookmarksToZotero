@@ -79,7 +79,7 @@ class Zotero:
         self.start_zotero()
 
     async def init(self):
-        if self.userdata_dir:
+        if not self.userdata_dir:
             cwd = os.getcwd()
             path = os.path.join(cwd, "temp")
             if not os.path.exists(path):
